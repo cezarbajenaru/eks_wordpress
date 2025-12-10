@@ -1,0 +1,26 @@
+# this is the workflow to build and push the docker image to Docker Hub using credentials
+name: Docker Image CI # just a name
+
+on:
+  push:
+    branches: ["main"]# triggers the workflow then a you commit to main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest #version of ubuntu on the VM that is used to run the workflow - github provides this
+
+    steps:
+    - uses: actions/checkout@v4 # checks out the repository code into the VM so Docker can build the image using my source files - github provides this
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/eks_wordpress:${{ github.sha }}
