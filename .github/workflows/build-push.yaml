@@ -3,7 +3,7 @@ name: Docker Image CI # just a name
 
 on:
   push:
-    branches: ["main"]# triggers the workflow then a you commit to main branch
+    branches: ["main"] # triggers the workflow then a you commit to main branch
 
 jobs:
   build:
