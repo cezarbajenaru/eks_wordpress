@@ -12,6 +12,7 @@ Each time a pipeline is triggered:
 
 PIPELINE WORKFLOW
 
+
 0. First we have to setup the secrets for Github (the VM ) to access the Github repos and pull/execute CI.yaml commands / push back
     GitHub → Settings → Developer settings → Personal access tokens (classic)
         Generate new token
@@ -28,27 +29,30 @@ PIPELINE WORKFLOW
         repository: cezarbajenaru/eks_wordpress_gitops
         token: ${{ secrets.GITOPS_PAT }}  # The token generated in github Settings/developer settings/Personal access tokens PAT, and put into the repo settings/secrets/actions
     If you have two repos, create separate secrets for the two repos and include a cluename for the token name. So you find it easier
-        
-1. Developer pushes changes to repo ( according to bellow rules regarding the types of changes!!! Not everything goes in the same place)
+
+1. Developer pushes changes to repo (choose pipeline triggering option/s )
 2. Git receives the push and finds the .github/workflows and starts executing the pipeline
-3. Github Spins up a VM with ubuntu and starts running the worflows/build-push.yaml in our case
+3. Github Spins up a VM with a configured ubuntu and starts running the worflows/build-push.yaml in our case
 4. VM checks code and uses the credentials (docker user and token) that have been put as secrets in github (separate entries in Github - username and token / token created in Dockerhub account)
 5. Dockerfile from repo pulls the official image of wordpress and executes further Dockerfile commands like COPY or SH commands
 6. VM pushes image to Dockerhub after it build it to spec ( ArgoCD did not detect this image yet!)
-7. VM updates application.yaml with the sed command that replaces the ( GITHUB MUST HAVE ACCESS PRIVELEDGES TO ACCES THE ARGO REPO)
-    Remember, we are now in app build pipeline repo, not in Argo repo. The two repos must communicate with access tokens ?? 
+6.5 VM gets to the part of the CI.yaml script that uses the repo credential tokens created at point 0. 
+    pulls GitOps repo to VM and uses sed command to replace/update the version tag of the application.yaml file.
+7. VM pushes back the updates to the GitOps repo. 
+  The sed command in the ci.yaml
+  sed -i "s/FIND_THIS/REPLACE_WITH_THIS/" filename
+        │  └─ Old text  └─ New text
+        └─ substitute command
 
-    Here is where you left off !
+    There is a regex version but we have not used it yet.
+    sed -i "s/version: .*/version: ${{ github.sha }}/" application.yaml
+#          ^^^^^^^ This is looking for "version:"
 
-8. VM commits and pushes application.yaml to GIT - ??? something is happening here  Must document
+7.5 Argo is not triggered buy the push!!! Argo ONLY watches the whole repo ( does not use diffs and does not check out a specific folder or file ) 
+    Ago polls every 3 minutes OR uses a webhook to detect  GitHub repo changes 
+8. Argo applies Kubernetes manifests (Helm charts that create create/change Kubernetes infrastructure) Kubernetes pulls the Dockerimage from Dockerhub | If git does not match the cluseter, resyncs automatically
+9. Argo secrets section still to be written and executed with SOPS???
 
-
-
-6. After executing the commands, run Docker build and pushes the image to the private Dockerhub account where the updated app resides
-6.5 . In the moment that Github received the initial push, Argo has been triggered also to pull that Dockerhub updated image.
-Must there be a delay? Argo waits for the Docker image to finish as an updated artifact?
-7. ArgoCD then takes the image, uses the Helm charts to create infrastructure + Argo specific Yaml configuration to automatically deploy or sync/refresh the applications.
-8. Argo secrets section still to be written and executed with SOPS
 
 
 If a push is going to anything else than ["main"] = prouction then other environments are linked to secondary branches. Tree bellow:
