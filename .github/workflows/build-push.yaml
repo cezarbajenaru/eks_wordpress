@@ -35,6 +35,7 @@ jobs:
 
     - name: Update argo/applications/apps.yaml
       run: |
+        cd ekscourse_gitops_platform
         sed -i "s/IMAGE_TAG_PLACEHOLDER/${{ github.sha }}/" argo/applications/apps.yaml
         git config user.name "GitHub Actions Bot" # this is the name of the user that will be used to commit the changes to the GitOps repo
         git config user.email "actions@github.com" # this is the email of the user that will be used to commit the changes to the GitOps repo
