@@ -25,6 +25,10 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/eks_wordpress:${{ github.sha }}
 
+    - name: Docker image scan with Trivy # this is to check if the image is secure and does not have any vulnerabilities/ set to exit code 0 to continue the workflow even if there are vulnerabilities
+      run: |
+        trivy image --exit-code 0 cezarbajenaru/eks_wordpress:${{ github.sha }}
+
 # CHECKOUT GIT OPS REPOO / update application.yaml from ArgoCD repo - it needs the github.sha
     - name: ArgoCD gitops repo update # get github.sha from eks_wordpress repo
       uses: actions/checkout@v4
