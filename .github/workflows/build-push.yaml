@@ -29,9 +29,9 @@ jobs:
     - name: ArgoCD gitops repo update # get github.sha from eks_wordpress repo
       uses: actions/checkout@v4
       with:
-        repository: cezarbajenaru/eks_wordpress_gitops
+        repository: cezarbajenaru/ekscourse_gitops_platform
         token: ${{ secrets.GITOPS_PAT }}
-        path: eks_wordpress_gitops
+        path: ekscourse_gitops_platform
 
     - name: Update application.yaml
       run: |
