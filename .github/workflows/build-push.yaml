@@ -33,13 +33,11 @@ jobs:
         token: ${{ secrets.GITOPS_PAT }}
         path: ekscourse_gitops_platform
 
-    - name: Update application.yaml
+    - name: Update argo/applications/apps.yaml
       run: |
-        sed -i "s/IMAGE_TAG_PLACEHOLDER/${{ github.sha }}/" application.yaml
+        sed -i "s/IMAGE_TAG_PLACEHOLDER/${{ github.sha }}/" argo/applications/apps.yaml
         git config user.name "GitHub Actions Bot" # this is the name of the user that will be used to commit the changes to the GitOps repo
         git config user.email "actions@github.com" # this is the email of the user that will be used to commit the changes to the GitOps repo
-        git add application.yaml
-        git commit -m "Update application.yaml to ${{ github.sha }}"
+        git add argo/applications/apps.yaml
+        git commit -m "Update argo/applications/apps.yaml to ${{ github.sha }}"
         git push origin main
-
-    
